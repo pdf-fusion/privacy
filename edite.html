@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Éditeur PDF Web Mobile</title>
+  <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+</head>
+<body style="font-family: sans-serif; text-align:center; padding:20px;">
+
+  <h2>✍️ Éditeur PDF Web</h2>
+
+  <!-- Import du PDF -->
+  <input type="file" id="upload" accept="application/pdf"><br><br>
+
+  <!-- Zone pour saisir le nouveau texte -->
+  <textarea id="newText" rows="3" cols="40" placeholder="Écrire le texte de remplacement..."></textarea><br><br>
+
+  <button onclick="editPdf()">Modifier PDF</button>
+
+  <script>
+    async function editPdf() {
+      const fileInput = document.getElementById("upload")
+      const newText = document.getElementById("newText").value
+
+      if (fileInput.files.length === 0) {
+        alert("⚠️ Importez d'abord un fichier PDF")
+        return
+      }
+
+      const file = fileInput.files[0]
+      const arrayBuffer = await file.arrayBuffer()
+
+      // Charger le PDF
+      const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer)
+
+      // Prendre la première page (exemple)
+      const pages = pdfDoc.getPages()
+      const firstPage = pages[0]
+
+      // Ajouter le texte à une position donnée
+      firstPage.drawText(newText || "Texte modifié", {
+        x: 100,
+        y: 500,
+        size: 18,
+        color: PDFLib.rgb(0, 0, 0),
+      })
+
+      // Sauvegarde du PDF
+      const pdfBytes = await pdfDoc.save()
+      const blob = new Blob([pdfBytes], { type: "application/pdf" })
+      const link = document.createElement("a")
+      link.href = URL.createObjectURL(blob)
+      link.download = "document_modifie.pdf"
+      link.click()
+    }
+  </script>
+</body>
+</html>
